@@ -41,7 +41,7 @@ file_historic_output_local <- "Dataout/em_disa.txt"
 path_historic_output_gdrive <- as_id("https://drive.google.com/drive/folders/1xBcPZNAeYGahYj_cXN5aG2-_WSDLi6rQ")
 
 
-# PULL METADATA ------------------------------------------------------
+# 1. PULL METADATA ------------------------------------------------------
 
 
 disa_datim_map <- pull_sitemap(sheet = "map_disa") %>% 
@@ -65,7 +65,7 @@ datim_orgsuids <- pull_hierarchy(uid, username = datim_user(), password = datim_
   arrange(snu, psnu, sitename)
 
 
-# INGEST DISA SUBMISSION --------------------------------------------------
+# 2. INGEST DISA SUBMISSION --------------------------------------------------
 
 
 df <- process_disa_vl(filename)
@@ -88,7 +88,7 @@ df %>%
   arrange(`n()`)
 
 
-# PRINT MONTHLY OUTPUT ----------------------------------------------------
+# 3. PRINT MONTHLY OUTPUT ----------------------------------------------------
 
 
 readr::write_tsv(
@@ -101,7 +101,7 @@ drive_put(file_monthly_output_local,
           name = glue({file}, '.txt'))
 
 
-# SURVEY MONTHLY DATASETS AND COMPILE ----------------------------
+# 4. SURVEY MONTHLY DATASETS AND COMPILE ----------------------------
 
 
 historic_files <- dir({path_monthly_output_local}, pattern = "*.txt")  # PATH FOR PURR TO FIND MONTHLY FILES TO COMPILE
@@ -109,6 +109,10 @@ historic_files <- dir({path_monthly_output_local}, pattern = "*.txt")  # PATH FO
 df_historic <- historic_files %>%
   map(~ read_tsv(file.path(path_monthly_output_local, .))) %>%
   reduce(rbind)
+
+
+
+# 5. JOIN META DATA & CLEAN --------------------------------------------------
 
 
 df_meta <- df_historic %>% 
@@ -171,7 +175,7 @@ df_final <- disa_meta %>%
   glimpse()
 
 
-# CHECK RESULTS LOST WHEN FILTERING ON DATIM_UID --------------------------
+# 6. CHECK RESULTS LOST WHEN FILTERING ON DATIM_UID --------------------------
 
 
 df_missing <- df_meta %>% 
@@ -186,7 +190,7 @@ sum(df_missing$VL, na.rm = T)
 
 
 
-# PLOT HISTORIC DATA ----------------------------------------------
+# 7. PLOT HISTORIC DATA ----------------------------------------------
 
 
 df_vl_plot <- df_final %>% 
@@ -206,7 +210,7 @@ df_vl_plot %>%
   facet_wrap(~group)
 
 
-# PRINT OUTPUTS -----------------------------------------------------------
+# 8. PRINT OUTPUTS -----------------------------------------------------------
 
 
 write.xlsx(disa_missing,
